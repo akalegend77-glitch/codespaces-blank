@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>FileShrink - Compress JPG Images</title>
+
+    <meta
+        name="description"
+        content="Compress JPG images quickly and easily. Your files stay in your browser."
+    >
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<main class="container">
+
+    <div class="logo">FileShrink</div>
+
+    <p class="subtitle">
+        Compress your JPG images quickly and easily.
+        Your files stay in your browser.
+    </p>
+
+
+    <!-- Upload Area -->
+
+    <section class="upload-box" id="uploadBox">
+
+        <div class="upload-icon">📁</div>
+
+        <h2>Compress a JPG image</h2>
+
+        <p class="upload-description">
+            Drag & drop your image here or choose a file.
+        </p>
+
+        <label for="fileInput" class="file-button">
+            Choose JPG Image
+        </label>
+
+        <input
+            type="file"
+            id="fileInput"
+            accept="image/jpeg"
+        >
+
+        <p class="file-hint">
+            JPG files only
+        </p>
+
+        <p id="fileName"></p>
+
+
+        <!-- Preview -->
+
+        <div id="previewContainer">
+
+            <img
+                id="preview"
+                alt="Selected image preview"
+            >
+
+        </div>
+
+
+        <!-- Controls -->
+
+        <div id="controls">
+
+            <label for="quality">
+
+                Image Quality:
+
+                <strong id="qualityValue">
+                    70%
+                </strong>
+
+            </label>
+
+            <input
+                type="range"
+                id="quality"
+                min="10"
+                max="95"
+                value="70"
+            >
+
+            <button id="compressButton">
+                Compress Image
+            </button>
+
+        </div>
+
+
+        <!-- Result -->
+
+        <div id="result">
+
+            <div class="success-message">
+                ✓ Compression complete
+            </div>
+
+            <div class="stats">
+
+                <div class="stat">
+                    <span>Original</span>
+                    <strong id="originalSize">-</strong>
+                </div>
+
+                <div class="stat">
+                    <span>Compressed</span>
+                    <strong id="compressedSize">-</strong>
+                </div>
+
+                <div class="stat">
+                    <span>You saved</span>
+                    <strong id="savedPercent">-</strong>
+                </div>
+
+            </div>
+
+            <p id="status"></p>
+
+            <a
+                id="downloadButton"
+                href="#"
+                style="display: none;"
+            >
+                Download Compressed JPG
+            </a>
+
+            <button
+                id="resetButton"
+                style="display: none;"
+            >
+                Compress Another Image
+            </button>
+
+        </div>
+
+    </section>
+
+
+    <!-- How it works -->
+
+    <section class="how-it-works">
+
+        <h2>How FileShrink works</h2>
+
+        <div class="steps">
+
+            <div class="step">
+                <div class="step-number">1</div>
+                <h3>Choose</h3>
+                <p>Select a JPG image from your device.</p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">2</div>
+                <h3>Compress</h3>
+                <p>Choose your quality and compress the image.</p>
+            </div>
+
+            <div class="step">
+                <div class="step-number">3</div>
+                <h3>Download</h3>
+                <p>Download your smaller JPG instantly.</p>
+            </div>
+
+        </div>
+
+    </section>
+
+
+    <p class="privacy">
+        🔒 Your image stays on your device. It is not uploaded to a server.
+    </p>
+
+</main>
+
+
+<script src="script.js"></script>
+
+</body>
+
+</html>
