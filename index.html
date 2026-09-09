@@ -13,6 +13,7 @@
     >
 
     <link rel="stylesheet" href="style.css">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
 </head>
 
 <body>
@@ -33,21 +34,22 @@
 
         <div class="upload-icon">📁</div>
 
-        <h2>Compress a JPG image</h2>
+        <h2>Compress a JPG images</h2>
 
         <p class="upload-description">
-            Drag & drop your image here or choose a file.
+            Drag & drop your images here or choose  files.
         </p>
 
         <label for="fileInput" class="file-button">
-            Choose JPG Image
+            Choose JPG Images
         </label>
 
         <input
-            type="file"
-            id="fileInput"
-            accept="image/jpeg"
-        >
+    type="file"
+    id="fileInput"
+    accept="image/jpeg"
+    multiple
+>
 
         <p class="file-hint">
             JPG files only
@@ -123,6 +125,9 @@
                 </div>
 
             </div>
+    
+
+</div>
 
             <p id="status"></p>
 
@@ -133,6 +138,8 @@
             >
                 Download Compressed JPG
             </a>
+            <div id="individualResults"></div>
+            <div id="downloadList"></div>
 
             <button
                 id="resetButton"

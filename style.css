@@ -12,7 +12,7 @@ body {
     background: #eef4ff;
     color: #172033;
 
-    padding: 40px 20px;
+   padding: 28px 14px 40px;
 }
 
 .container {
@@ -227,12 +227,55 @@ body {
 
 #result {
     display: none;
-
     margin-top: 30px;
-
-    padding-top: 25px;
-
+    padding: 25px 20px 0;
     border-top: 1px solid #e2e8f0;
+}
+
+.success-message {
+    color: #315bea;
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.stat {
+    background: #f1f5ff;
+    border-radius: 14px;
+    padding: 17px 10px;
+}
+
+.stat span {
+    display: block;
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 7px;
+}
+
+.stat strong {
+    font-size: 18px;
+    color: #172033;
+}
+
+#savedPercent {
+    color: #315bea;
+}
+
+#status {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 18px;
 }
 
 .success-message {
@@ -285,6 +328,32 @@ body {
     line-height: 1.5;
 
     margin-bottom: 15px;
+}
+.comparison {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.comparison-label {
+    color: #64748b;
+    font-size: 13px;
+    margin-bottom: 8px;
+}
+
+.comparison-track {
+    width: 100%;
+    height: 12px;
+    background: #e2e8f0;
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+#comparisonBar {
+    width: 0%;
+    height: 100%;
+    background: #315bea;
+    border-radius: 20px;
+    transition: width 0.6s ease;
 }
 
 
@@ -494,26 +563,178 @@ body {
 @media (max-width: 600px) {
 
     body {
-        padding: 25px 15px;
+        padding: 22px 12px 35px;
     }
 
     .logo {
-        font-size: 38px;
+        font-size: 42px;
+        margin-bottom: 8px;
+    }
+
+    .subtitle {
+        font-size: 15px;
+        line-height: 1.5;
+        margin-bottom: 24px;
     }
 
     .upload-box {
-        padding: 30px 20px;
+        padding: 32px 18px;
+        border-radius: 20px;
     }
+
+    .upload-icon {
+        font-size: 40px;
+        margin-bottom: 12px;
+    }
+
+    .upload-box h2 {
+        font-size: 22px;
+    }
+
+    .upload-description {
+        font-size: 14px;
+        line-height: 1.5;
+        margin-bottom: 20px;
+    }
+
+    .file-button {
+        width: 100%;
+        padding: 15px 18px;
+        font-size: 16px;
+    }
+
+    #preview {
+        max-height: 300px;
+    }
+
+    #controls {
+        margin-top: 26px;
+    }
+
+    #controls label {
+        font-size: 15px;
+    }
+
+    #quality {
+        height: 28px;
+    }
+
+    #compressButton {
+        padding: 15px;
+        font-size: 16px;
+    }
+
+    #result {
+    margin-top: 26px;
+    padding: 22px 0 0;
+}
+
+.success-message {
+    font-size: 17px;
+}
+
+.stat {
+    padding: 16px;
+}
+
+#status {
+    padding: 12px;
+}
 
     .stats {
         grid-template-columns: 1fr;
+        gap: 10px;
+    }
+
+    .stat {
+        padding: 15px;
+    }
+
+    #downloadButton,
+    #resetButton {
+        padding: 15px;
+        font-size: 15px;
+    }
+
+    .how-it-works {
+        margin-top: 38px;
+    }
+
+    .how-it-works h2 {
+        font-size: 22px;
     }
 
     .steps {
         grid-template-columns: 1fr;
+        gap: 12px;
     }
 
-    .privacy-page h1 {
-        font-size: 26px;
+    .step {
+        padding: 22px 16px;
     }
+
+    .privacy {
+        margin-top: 25px;
+        padding: 0 8px;
+        font-size: 12px;
+        line-height: 1.5;
+    }
+}
+.individual-result {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 16px;
+    margin-top: 12px;
+    text-align: left;
+}
+
+.individual-result strong {
+    display: block;
+    color: #172033;
+    font-size: 14px;
+    margin-bottom: 12px;
+    word-break: break-word;
+}
+
+.individual-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.individual-stats span {
+    background: white;
+    border-radius: 9px;
+    padding: 9px 7px;
+    color: #64748b;
+    font-size: 12px;
+    text-align: center;
+}
+@media (max-width: 600px) {
+
+    .individual-stats {
+        grid-template-columns: 1fr;
+    }
+
+    .individual-stats span {
+        text-align: left;
+    }
+}
+.extra-download {
+    display: block;
+    margin-top: 10px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #eef4ff;
+    color: #315bea;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px;
+    text-align: center;
+    transition: 0.2s ease;
+}
+
+.extra-download:hover {
+    background: #dfe9ff;
 }
