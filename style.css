@@ -24,6 +24,9 @@ body {
     text-align: center;
 }
 
+
+/* Logo */
+
 .logo {
     font-size: 46px;
     font-weight: 800;
@@ -34,6 +37,9 @@ body {
 
     margin-bottom: 10px;
 }
+
+
+/* Subtitle */
 
 .subtitle {
     color: #64748b;
@@ -69,6 +75,9 @@ body {
 
     transform: scale(1.01);
 }
+
+
+/* Upload */
 
 .upload-icon {
     font-size: 42px;
@@ -410,6 +419,75 @@ body {
     font-size: 13px;
 }
 
+.privacy-link {
+    margin-top: 10px;
+}
+
+.privacy-link a {
+    color: #315bea;
+
+    text-decoration: none;
+
+    font-size: 13px;
+
+    font-weight: 600;
+}
+
+.privacy-link a:hover {
+    text-decoration: underline;
+}
+
+
+/* Privacy Page */
+
+.privacy-page {
+    text-align: left;
+
+    border-style: solid;
+}
+
+.privacy-page h1 {
+    font-size: 30px;
+
+    margin-bottom: 20px;
+
+    text-align: center;
+}
+
+.privacy-page h2 {
+    font-size: 19px;
+
+    margin-top: 28px;
+
+    margin-bottom: 8px;
+}
+
+.privacy-page p {
+    color: #64748b;
+
+    font-size: 15px;
+
+    line-height: 1.7;
+}
+
+.privacy-back {
+    margin-top: 30px;
+
+    text-align: center;
+}
+
+.privacy-back a {
+    color: #315bea;
+
+    text-decoration: none;
+
+    font-weight: bold;
+}
+
+.privacy-back a:hover {
+    text-decoration: underline;
+}
+
 
 /* Mobile */
 
@@ -433,5 +511,9 @@ body {
 
     .steps {
         grid-template-columns: 1fr;
+    }
+
+    .privacy-page h1 {
+        font-size: 26px;
     }
 }
