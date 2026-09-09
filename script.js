@@ -575,18 +575,6 @@ function createDownloadButtons(results) {
         "block";
 
 
-    // Mobile-friendly download handler
-
-    downloadButton.onclick = function (event) {
-
-        event.preventDefault();
-
-        downloadBlob(
-            firstResult.blob,
-            "compressed-" + firstResult.file.name
-        );
-    };
-
 
     // Individual download buttons
 
