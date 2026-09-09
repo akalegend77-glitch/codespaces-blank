@@ -544,52 +544,51 @@ const displayedSaved =
 // ========================================
 
 function createDownloadButtons(results) {
+
     downloadList.innerHTML = "";
 
     if (downloadURL) {
-
         URL.revokeObjectURL(downloadURL);
-
         downloadURL = null;
     }
 
-
-    // First result uses the existing download button
-
-    const firstResult =
-        results[0];
-
+    const firstResult = results[0];
 
     downloadURL =
-        URL.createObjectURL(
-            firstResult.blob
-        );
+        URL.createObjectURL(firstResult.blob);
 
-
-    downloadButton.href =
-        downloadURL;
-
+    downloadButton.href = downloadURL;
 
     downloadButton.download =
         "compressed-" +
         firstResult.file.name;
-
 
     downloadButton.textContent =
         results.length === 1
             ? "Download Compressed JPG"
             : "Download First Compressed JPG";
 
-
     downloadButton.style.display =
         "inline-block";
-
 
     resetButton.style.display =
         "block";
 
 
-    // Add individual download buttons
+    // Mobile-friendly download handler
+
+    downloadButton.onclick = function (event) {
+
+        event.preventDefault();
+
+        downloadBlob(
+            firstResult.blob,
+            "compressed-" + firstResult.file.name
+        );
+    };
+
+
+    // Individual download buttons
 
     if (results.length > 1) {
 
@@ -597,28 +596,26 @@ function createDownloadButtons(results) {
             function (item, index) {
 
                 const link =
-                    document.createElement(
-                        "a"
-                    );
+                    document.createElement("a");
 
-
-                link.href =
-                    URL.createObjectURL(
-                        item.blob
-                    );
-
-
-                link.download =
-                    "compressed-" +
-                    item.file.name;
-
+                link.href = "#";
 
                 link.textContent =
                     `Download ${index + 1}: ${item.file.name}`;
 
-
                 link.className =
-    "extra-download";
+                    "extra-download";
+
+
+                link.onclick = function (event) {
+
+                    event.preventDefault();
+
+                    downloadBlob(
+                        item.blob,
+                        "compressed-" + item.file.name
+                    );
+                };
 
 
                 downloadList.appendChild(link);
@@ -627,6 +624,35 @@ function createDownloadButtons(results) {
     }
 }
 
+
+// ========================================
+// DOWNLOAD BLOB
+// ========================================
+
+function downloadBlob(blob, filename) {
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const link =
+        document.createElement("a");
+
+    link.href = url;
+
+    link.download = filename;
+
+    link.style.display = "none";
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    setTimeout(function () {
+        URL.revokeObjectURL(url);
+    }, 1000);
+}
 
 // ========================================
 // RESET
