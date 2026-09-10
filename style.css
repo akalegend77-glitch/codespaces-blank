@@ -133,7 +133,7 @@ margin-bottom: 24px;
 }
 
 #fileInput {
-display: none;
+display: none !important;
 }
 
 .file-button {
@@ -946,7 +946,7 @@ body {
     appearance: none;
     -webkit-appearance: none;
 
-    display: inline-block !important;
+    display: none;
 
     margin: 16px auto 0 !important;
     padding: 10px 20px !important;
