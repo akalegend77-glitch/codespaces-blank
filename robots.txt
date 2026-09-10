@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://akalegend77-glitch.github.io/codespaces-blank/sitemap.xml

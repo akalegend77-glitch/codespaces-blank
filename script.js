@@ -6,6 +6,9 @@ const multipleFileInput =
 
 const fileButtons =
     document.querySelector(".file-buttons");
+    
+    const chooseAnotherButton =
+    document.getElementById("chooseAnotherButton");
 
 const fileName =
     document.getElementById("fileName");
@@ -112,7 +115,22 @@ multipleFileInput.addEventListener(
         handleFiles(files);
     }
 );
+chooseAnotherButton.addEventListener(
+    "click",
+    function () {
 
+        if (fileButtons) {
+            fileButtons.style.display = "flex";
+        }
+        if (chooseAnotherButton) {
+    chooseAnotherButton.style.display =
+        "none";
+}
+
+        chooseAnotherButton.style.display =
+            "none";
+    }
+);
 
 // ========================================
 // HANDLE FILES
@@ -133,8 +151,7 @@ function handleFiles(files) {
 
         return;
     }
-
-selectedFiles =
+    selectedFiles =
     jpgFiles;
 
 compressButton.textContent =
@@ -144,6 +161,10 @@ compressButton.textContent =
 
 if (fileButtons) {
     fileButtons.style.display = "none";
+}
+
+if (chooseAnotherButton) {
+    chooseAnotherButton.style.display = "inline-block";
 }
 
     if (jpgFiles.length === 1) {
