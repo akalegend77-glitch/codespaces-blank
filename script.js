@@ -42,10 +42,11 @@ const status =
 
 const downloadButton =
     document.getElementById("downloadButton");
-    const downloadList =
+
+const downloadList =
     document.getElementById("downloadList");
-    
-    const individualResults =
+
+const individualResults =
     document.getElementById("individualResults");
 
 const resetButton =
@@ -57,6 +58,19 @@ let selectedFiles = [];
 let previewURL = null;
 
 let downloadURL = null;
+
+
+// ========================================
+// BATCH RESULT STATE
+// ========================================
+
+let compressedResults = [];
+
+let currentPage = 1;
+
+const RESULTS_PER_PAGE = 5;
+
+let batchDownloadURLs = [];
 
 
 // ========================================
@@ -153,6 +167,11 @@ function handleFiles(files) {
 
     qualityValue.textContent =
         "70%";
+
+
+    // Clear old batch results
+
+    clearBatchResults();
 }
 
 
@@ -276,13 +295,13 @@ async function compressAllImages() {
             `Compressing ${i + 1} of ${selectedFiles.length} images...`;
 
 
-        const result =
+        const compressed =
             await compressImage(
                 selectedFiles[i]
             );
 
 
-        results.push(result);
+        results.push(compressed);
     }
 
 
@@ -387,30 +406,34 @@ function compressImage(file) {
 
                             function (blob) {
 
+                                // If compression makes the
+                                // file larger, keep original.
+
                                 const finalBlob =
-    blob && blob.size < file.size
-        ? blob
-        : file;
+                                    blob && blob.size < file.size
+                                        ? blob
+                                        : file;
 
-resolve({
 
-    file: file,
+                                resolve({
 
-    blob: finalBlob,
+                                    file: file,
 
-    originalWidth:
-        image.width,
+                                    blob: finalBlob,
 
-    originalHeight:
-        image.height,
+                                    originalWidth:
+                                        image.width,
 
-    finalWidth:
-        width,
+                                    originalHeight:
+                                        image.height,
 
-    finalHeight:
-        height
+                                    finalWidth:
+                                        width,
 
-});
+                                    finalHeight:
+                                        height
+
+                                });
 
                             },
 
@@ -436,6 +459,13 @@ resolve({
 // ========================================
 
 function showResults(results) {
+
+    compressedResults =
+        results;
+
+    currentPage =
+        1;
+
 
     const totalOriginal =
         results.reduce(
@@ -473,23 +503,257 @@ function showResults(results) {
 
 
     savedPercent.textContent =
-    totalSaved >= 0.5
-        ? totalSaved.toFixed(1) + "%"
-        : "0%";
+        totalSaved >= 0.5
+            ? totalSaved.toFixed(1) + "%"
+            : "0%";
+
 
     status.textContent =
         `${results.length} image${results.length === 1 ? "" : "s"} compressed successfully.`;
 
 
-    // Clear previous individual results
+    // Clear old results
 
     individualResults.innerHTML = "";
 
+    downloadList.innerHTML = "";
 
-    // Create individual result cards
 
-    results.forEach(
-        function (item, index) {
+    // Single image:
+    // No individual result box needed.
+
+    if (results.length === 1) {
+
+        hideBatchUI();
+
+    } else {
+
+        // Multiple images:
+        // Show compact paginated result panel.
+
+        createBatchUI();
+
+        renderBatchPage();
+    }
+
+
+    createDownloadButtons(results);
+}
+
+
+// ========================================
+// CREATE BATCH UI
+// ========================================
+
+function createBatchUI() {
+
+    hideBatchUI();
+
+
+    const header =
+        document.createElement("div");
+
+    header.id =
+        "batchHeader";
+
+    header.className =
+        "batch-header";
+
+
+    const title =
+        document.createElement("strong");
+
+    title.textContent =
+        "Compression Details";
+
+
+    const pageInfo =
+        document.createElement("span");
+
+    pageInfo.id =
+        "batchPageInfo";
+
+
+    header.appendChild(title);
+
+    header.appendChild(pageInfo);
+
+
+    individualResults.appendChild(
+        header
+    );
+
+
+    const navigation =
+        document.createElement("div");
+
+    navigation.id =
+        "batchNavigation";
+
+    navigation.className =
+        "batch-navigation";
+
+
+    const previousButton =
+        document.createElement("button");
+
+    previousButton.id =
+        "prevPage";
+
+    previousButton.type =
+        "button";
+
+    previousButton.textContent =
+        "‹ Previous";
+
+
+    const nextButton =
+        document.createElement("button");
+
+    nextButton.id =
+        "nextPage";
+
+    nextButton.type =
+        "button";
+
+    nextButton.textContent =
+        "Next ›";
+
+
+    previousButton.addEventListener(
+        "click",
+        function () {
+
+            if (currentPage > 1) {
+
+                currentPage--;
+
+                renderBatchPage();
+            }
+        }
+    );
+
+
+    nextButton.addEventListener(
+        "click",
+        function () {
+
+            const totalPages =
+                Math.ceil(
+                    compressedResults.length /
+                    RESULTS_PER_PAGE
+                );
+
+
+            if (currentPage < totalPages) {
+
+                currentPage++;
+
+                renderBatchPage();
+            }
+        }
+    );
+
+
+    navigation.appendChild(
+        previousButton
+    );
+
+    navigation.appendChild(
+        nextButton
+    );
+
+
+    individualResults.appendChild(
+        navigation
+    );
+
+
+}
+
+
+// ========================================
+// RENDER BATCH PAGE
+// ========================================
+
+function renderBatchPage() {
+
+    if (
+        compressedResults.length <= 1
+    ) {
+        return;
+    }
+
+
+    const header =
+        document.getElementById(
+            "batchHeader"
+        );
+
+
+    const navigation =
+        document.getElementById(
+            "batchNavigation"
+        );
+
+
+    const pageInfo =
+        document.getElementById(
+            "batchPageInfo"
+        );
+
+
+    if (
+        !header ||
+        !navigation ||
+        !pageInfo
+    ) {
+        return;
+    }
+
+
+    // Remove old cards only.
+    // Keep header, navigation and download button.
+
+    const oldCards =
+        individualResults.querySelectorAll(
+            ".individual-result"
+        );
+
+
+    oldCards.forEach(
+        function (card) {
+            card.remove();
+        }
+    );
+
+
+    const startIndex =
+        (
+            currentPage - 1
+        ) * RESULTS_PER_PAGE;
+
+
+    const endIndex =
+        Math.min(
+            startIndex + RESULTS_PER_PAGE,
+            compressedResults.length
+        );
+
+
+    const visibleResults =
+        compressedResults.slice(
+            startIndex,
+            endIndex
+        );
+
+
+    visibleResults.forEach(
+        function (item, visibleIndex) {
+
+            const actualIndex =
+                startIndex + visibleIndex;
+
 
             const card =
                 document.createElement("div");
@@ -497,45 +761,154 @@ function showResults(results) {
             card.className =
                 "individual-result";
 
-const saved =
-    item.blob.size < item.file.size
-        ? (
-            (item.file.size - item.blob.size) /
-            item.file.size
-        ) * 100
-        : 0;
 
-const displayedSaved =
-    saved >= 0.5
-        ? saved.toFixed(1)
-        : "0";
+            const title =
+                document.createElement("strong");
+
+            title.textContent =
+                `${actualIndex + 1}. ${item.file.name}`;
 
 
-            card.innerHTML = `
-                <strong>${index + 1}. ${item.file.name}</strong>
+            const stats =
+                document.createElement("div");
 
-                <div class="individual-stats">
-                    <span>
-                        Original: ${formatSize(item.file.size)}
-                    </span>
-
-                    <span>
-                        Compressed: ${formatSize(item.blob.size)}
-                    </span>
-
-                    <span>
-                        Saved: ${displayedSaved}%
-                    </span>
-                </div>
-            `;
+            stats.className =
+                "individual-stats";
 
 
-            individualResults.appendChild(card);
+            const original =
+                document.createElement("span");
+
+            original.textContent =
+                `Original: ${formatSize(item.file.size)}`;
+
+
+            const compressed =
+                document.createElement("span");
+
+            compressed.textContent =
+                `Compressed: ${formatSize(item.blob.size)}`;
+
+
+            const saved =
+                item.blob.size < item.file.size
+                    ? (
+                        (
+                            item.file.size -
+                            item.blob.size
+                        ) /
+                        item.file.size
+                    ) * 100
+                    : 0;
+
+
+            const displayedSaved =
+                saved >= 0.5
+                    ? saved.toFixed(1)
+                    : "0";
+
+
+            const savedText =
+                document.createElement("span");
+
+            savedText.textContent =
+                `Saved: ${displayedSaved}%`;
+
+
+            stats.appendChild(
+                original
+            );
+
+            stats.appendChild(
+                compressed
+            );
+
+            stats.appendChild(
+                savedText
+            );
+
+
+            const downloadLink =
+                document.createElement("a");
+
+            downloadLink.href =
+                "#";
+
+            downloadLink.textContent =
+                "Download JPG";
+
+            downloadLink.className =
+                "extra-download";
+
+
+            downloadLink.addEventListener(
+                "click",
+                function (event) {
+
+                    event.preventDefault();
+
+
+                    downloadBlob(
+                        item.blob,
+                        "compressed-" +
+                        item.file.name
+                    );
+                }
+            );
+
+
+            card.appendChild(
+                title
+            );
+
+            card.appendChild(
+                stats
+            );
+
+            card.appendChild(
+                downloadLink
+            );
+
+
+            // Insert cards before navigation
+
+            individualResults.insertBefore(
+                card,
+                navigation
+            );
         }
     );
 
 
-    createDownloadButtons(results);
+    const totalPages =
+        Math.ceil(
+            compressedResults.length /
+            RESULTS_PER_PAGE
+        );
+
+
+    pageInfo.textContent =
+        `${startIndex + 1}–${endIndex} of ${compressedResults.length}`;
+
+
+    const previousButton =
+        document.getElementById(
+            "prevPage"
+        );
+
+
+    const nextButton =
+        document.getElementById(
+            "nextPage"
+        );
+
+
+    previousButton.disabled =
+        currentPage === 1;
+
+
+    nextButton.disabled =
+        currentPage === totalPages;
 }
 
 
@@ -547,69 +920,102 @@ function createDownloadButtons(results) {
 
     downloadList.innerHTML = "";
 
+
     if (downloadURL) {
-        URL.revokeObjectURL(downloadURL);
+
+        URL.revokeObjectURL(
+            downloadURL
+        );
+
         downloadURL = null;
     }
 
-    const firstResult = results[0];
 
-    downloadURL =
-        URL.createObjectURL(firstResult.blob);
+    const firstResult =
+        results[0];
 
-    downloadButton.href = downloadURL;
 
-    downloadButton.download =
-        "compressed-" +
-        firstResult.file.name;
+    if (!firstResult) {
+        return;
+    }
 
-    downloadButton.textContent =
-        results.length === 1
-            ? "Download Compressed JPG"
-            : "Download First Compressed JPG";
 
-    downloadButton.style.display =
-        "inline-block";
+    // ========================================
+    // SINGLE IMAGE
+    // ========================================
+
+    if (results.length === 1) {
+
+        downloadURL =
+            URL.createObjectURL(
+                firstResult.blob
+            );
+
+
+        downloadButton.href =
+            downloadURL;
+
+
+        downloadButton.download =
+            "compressed-" +
+            firstResult.file.name;
+
+
+        downloadButton.textContent =
+            "Download Compressed JPG";
+
+
+        downloadButton.style.display =
+            "inline-block";
+
+
+        // Remove any previous batch click behavior
+
+        downloadButton.onclick =
+            null;
+
+
+    // ========================================
+    // MULTIPLE IMAGES
+    // ========================================
+
+    } else {
+
+        // Main button becomes Download All as ZIP
+
+        downloadButton.href =
+            "#";
+
+
+        downloadButton.removeAttribute(
+            "download"
+        );
+
+
+        downloadButton.textContent =
+            "Download All as ZIP";
+
+
+        downloadButton.style.display =
+            "inline-block";
+
+
+        // Download ZIP when main button is clicked
+
+        downloadButton.onclick =
+            async function (event) {
+
+                event.preventDefault();
+
+                await createZipDownload(
+                    compressedResults
+                );
+            };
+    }
+
 
     resetButton.style.display =
         "block";
-
-
-
-    // Individual download buttons
-
-    if (results.length > 1) {
-
-        results.forEach(
-            function (item, index) {
-
-                const link =
-                    document.createElement("a");
-
-                link.href = "#";
-
-                link.textContent =
-                    `Download ${index + 1}: ${item.file.name}`;
-
-                link.className =
-                    "extra-download";
-
-
-                link.onclick = function (event) {
-
-                    event.preventDefault();
-
-                    downloadBlob(
-                        item.blob,
-                        "compressed-" + item.file.name
-                    );
-                };
-
-
-                downloadList.appendChild(link);
-            }
-        );
-    }
 }
 
 
@@ -617,30 +1023,361 @@ function createDownloadButtons(results) {
 // DOWNLOAD BLOB
 // ========================================
 
-function downloadBlob(blob, filename) {
+function downloadBlob(
+    blob,
+    filename
+) {
 
     const url =
-        URL.createObjectURL(blob);
+        URL.createObjectURL(
+            blob
+        );
+
 
     const link =
         document.createElement("a");
 
-    link.href = url;
 
-    link.download = filename;
+    link.href =
+        url;
 
-    link.style.display = "none";
 
-    document.body.appendChild(link);
+    link.download =
+        filename;
+
+
+    link.style.display =
+        "none";
+
+
+    document.body.appendChild(
+        link
+    );
+
 
     link.click();
 
-    document.body.removeChild(link);
 
-    setTimeout(function () {
-        URL.revokeObjectURL(url);
-    }, 1000);
+    document.body.removeChild(
+        link
+    );
+
+
+    setTimeout(
+        function () {
+
+            URL.revokeObjectURL(
+                url
+            );
+
+        },
+        1000
+    );
 }
+
+
+// ========================================
+// LOAD JSZIP
+// ========================================
+
+function loadJSZip() {
+
+    return new Promise(
+        function (resolve, reject) {
+
+            // Already loaded
+
+            if (
+                typeof JSZip !== "undefined"
+            ) {
+
+                resolve(JSZip);
+
+                return;
+            }
+
+
+            const existingScript =
+                document.querySelector(
+                    'script[data-fileshrink-jszip="true"]'
+                );
+
+
+            if (existingScript) {
+
+                existingScript.addEventListener(
+                    "load",
+                    function () {
+
+                        resolve(JSZip);
+                    }
+                );
+
+
+                existingScript.addEventListener(
+                    "error",
+                    function () {
+
+                        reject(
+                            new Error(
+                                "Could not load ZIP library."
+                            )
+                        );
+                    }
+                );
+
+
+                return;
+            }
+
+
+            const script =
+                document.createElement("script");
+
+
+            script.src =
+                "https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js";
+
+
+            script.async =
+                true;
+
+
+            script.dataset.fileshrinkJszip =
+                "true";
+
+
+            script.onload =
+                function () {
+
+                    if (
+                        typeof JSZip !== "undefined"
+                    ) {
+
+                        resolve(JSZip);
+
+                    } else {
+
+                        reject(
+                            new Error(
+                                "ZIP library loaded incorrectly."
+                            )
+                        );
+                    }
+                };
+
+
+            script.onerror =
+                function () {
+
+                    reject(
+                        new Error(
+                            "Could not load ZIP library."
+                        )
+                    );
+                };
+
+
+            document.head.appendChild(
+                script
+            );
+        }
+    );
+}
+
+
+// ========================================
+// CREATE ZIP DOWNLOAD
+// ========================================
+
+async function createZipDownload(
+    results
+) {
+
+    if (
+        !results ||
+        results.length === 0
+    ) {
+        return;
+    }
+
+
+    const downloadAllButton =
+        document.getElementById(
+            "downloadAllButton"
+        );
+
+
+    if (downloadAllButton) {
+
+        downloadAllButton.disabled =
+            true;
+
+        downloadAllButton.textContent =
+            "Creating ZIP...";
+    }
+
+
+    status.textContent =
+        "Preparing ZIP download...";
+
+
+    try {
+
+        const Zip =
+            await loadJSZip();
+
+
+        const zip =
+            new Zip();
+
+
+        results.forEach(
+            function (item, index) {
+
+                const originalName =
+                    item.file.name;
+
+
+                const extension =
+                    ".jpg";
+
+
+                const baseName =
+                    originalName
+                        .replace(
+                            /\.[^/.]+$/,
+                            ""
+                        );
+
+
+                const filename =
+                    `${String(index + 1).padStart(2, "0")}-${baseName}${extension}`;
+
+
+                zip.file(
+                    filename,
+                    item.blob
+                );
+            }
+        );
+
+
+        status.textContent =
+            "Creating ZIP file...";
+
+
+        const zipBlob =
+            await zip.generateAsync(
+                {
+                    type: "blob"
+                }
+            );
+
+
+        downloadBlob(
+            zipBlob,
+            "FileShrink-compressed-images.zip"
+        );
+
+
+        status.textContent =
+            `${results.length} images compressed successfully. ZIP download started.`;
+
+
+    } catch (error) {
+
+        console.error(
+            "ZIP creation failed:",
+            error
+        );
+
+
+        status.textContent =
+            "Could not create ZIP. Please try again.";
+
+
+    } finally {
+
+        if (downloadAllButton) {
+
+            downloadAllButton.disabled =
+                false;
+
+            downloadAllButton.textContent =
+                "Download All as ZIP";
+        }
+    }
+}
+
+
+// ========================================
+// CLEAR BATCH RESULTS
+// ========================================
+
+function clearBatchResults() {
+
+    compressedResults =
+        [];
+
+    currentPage =
+        1;
+
+
+    clearBatchDownloadURLs();
+
+
+    if (individualResults) {
+
+        individualResults.innerHTML =
+            "";
+    }
+
+
+    if (downloadList) {
+
+        downloadList.innerHTML =
+            "";
+    }
+}
+
+
+// ========================================
+// CLEAR BATCH DOWNLOAD URLS
+// ========================================
+
+function clearBatchDownloadURLs() {
+
+    batchDownloadURLs.forEach(
+        function (url) {
+
+            URL.revokeObjectURL(
+                url
+            );
+        }
+    );
+
+
+    batchDownloadURLs =
+        [];
+}
+
+
+// ========================================
+// HIDE BATCH UI
+// ========================================
+
+function hideBatchUI() {
+
+    if (!individualResults) {
+        return;
+    }
+
+
+    individualResults.innerHTML =
+        "";
+}
+
 
 // ========================================
 // RESET
@@ -652,6 +1389,10 @@ resetButton.addEventListener(
 
         selectedFiles = [];
 
+        compressedResults = [];
+
+        currentPage = 1;
+
 
         fileInput.value = "";
 
@@ -659,8 +1400,10 @@ resetButton.addEventListener(
         previewContainer.style.display =
             "none";
 
+
         controls.style.display =
             "none";
+
 
         result.style.display =
             "none";
@@ -669,12 +1412,14 @@ resetButton.addEventListener(
         fileName.textContent =
             "";
 
+
         status.textContent =
             "";
 
 
         downloadButton.style.display =
             "none";
+
 
         resetButton.style.display =
             "none";
@@ -684,12 +1429,20 @@ resetButton.addEventListener(
             "Download Compressed JPG";
 
 
-        
+        downloadList.innerHTML =
+            "";
 
-        downloadList.innerHTML = "";
+
+        individualResults.innerHTML =
+            "";
 
 
-        quality.value = 70;
+        clearBatchDownloadURLs();
+
+
+        quality.value =
+            70;
+
 
         qualityValue.textContent =
             "70%";
@@ -715,7 +1468,8 @@ resetButton.addEventListener(
         }
 
 
-        preview.src = "";
+        preview.src =
+            "";
     }
 );
 
