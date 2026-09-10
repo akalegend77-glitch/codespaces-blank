@@ -1,5 +1,11 @@
-const fileInput =
-    document.getElementById("fileInput");
+const singleFileInput =
+    document.getElementById("singleFileInput");
+
+const multipleFileInput =
+    document.getElementById("multipleFileInput");
+
+const fileButtons =
+    document.querySelector(".file-buttons");
 
 const fileName =
     document.getElementById("fileName");
@@ -75,17 +81,29 @@ const RESULTS_PER_PAGE = 5;
 
 let batchDownloadURLs = [];
 
-
 // ========================================
 // FILE SELECTION
 // ========================================
 
-fileInput.addEventListener(
+singleFileInput.addEventListener(
     "change",
     function () {
-
         const files =
-            Array.from(fileInput.files);
+            Array.from(singleFileInput.files);
+
+        if (files.length === 0) {
+            return;
+        }
+
+        handleFiles(files);
+    }
+);
+
+multipleFileInput.addEventListener(
+    "change",
+    function () {
+        const files =
+            Array.from(multipleFileInput.files);
 
         if (files.length === 0) {
             return;
@@ -116,10 +134,17 @@ function handleFiles(files) {
         return;
     }
 
+selectedFiles =
+    jpgFiles;
 
-    selectedFiles =
-        jpgFiles;
+compressButton.textContent =
+    selectedFiles.length === 1
+        ? "Compress Image"
+        : "Compress Images";
 
+if (fileButtons) {
+    fileButtons.style.display = "none";
+}
 
     if (jpgFiles.length === 1) {
 
@@ -249,8 +274,10 @@ compressButton.addEventListener(
     async function () {
 
         if (selectedFiles.length === 0) {
-            return;
-        }
+    status.textContent =
+        "No files chosen. Please select at least one JPG image.";
+    return;
+}
 
 
         compressButton.disabled =
@@ -272,10 +299,11 @@ compressButton.addEventListener(
 
 
         compressButton.disabled =
-            false;
-
-        compressButton.textContent =
-            "Compress Images";
+    false;
+compressButton.textContent =
+    selectedFiles.length === 1
+        ? "Compress Image"
+        : "Compress Images";
     }
 );
 
@@ -1653,13 +1681,17 @@ resetButton.addEventListener(
     function () {
 
         selectedFiles = [];
+compressedResults = [];
+currentPage = 1;
 
-        compressedResults = [];
+singleFileInput.value = "";
+multipleFileInput.value = "";
+compressButton.textContent =
+    "Compress Image";
 
-        currentPage = 1;
-
-
-        fileInput.value = "";
+if (fileButtons) {
+    fileButtons.style.display = "flex";
+}
 
 
         previewContainer.style.display =

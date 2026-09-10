@@ -40,13 +40,27 @@
             Drag & drop your images here or choose  files.
         </p>
 
-        <label for="fileInput" class="file-button">
-            Choose JPG Images
-        </label>
+        <div class="file-buttons">
 
-        <input
+    <label for="singleFileInput" class="file-button">
+        Choose One Image
+    </label>
+
+    <label for="multipleFileInput" class="file-button">
+        Choose Multiple Images
+    </label>
+
+</div>
+
+<input
     type="file"
-    id="fileInput"
+    id="singleFileInput"
+    accept="image/jpeg"
+>
+
+<input
+    type="file"
+    id="multipleFileInput"
     accept="image/jpeg"
     multiple
 >

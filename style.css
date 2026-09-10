@@ -853,3 +853,88 @@ body {
 }
 
 }
+.file-buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin: 16px 0;
+    width: 100%;
+}
+
+.file-buttons .file-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    box-sizing: border-box;
+
+    width: 190px !important;
+    min-width: 190px !important;
+    max-width: 190px !important;
+
+    height: 44px !important;
+
+    margin: 0 !important;
+    padding: 0 10px !important;
+
+    font-size: 14px;
+    line-height: 1;
+    text-align: center;
+}
+
+@media (max-width: 500px) {
+    .file-buttons {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .file-buttons .file-button {
+        width: 80% !important;
+        min-width: 0 !important;
+        max-width: 260px !important;
+    }
+}
+#singleFileInput,
+#multipleFileInput {
+    display: none;
+}
+.target-size-input {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 260px;
+    margin-top: 8px;
+    background: #151c2b;
+    border: 1px solid #33415c;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.target-size-input input {
+    flex: 1;
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: #ffffff;
+    padding: 12px 14px;
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.target-size-input input::placeholder {
+    color: #7f8aa3;
+}
+
+.target-size-input input:focus {
+    background: #192237;
+}
+
+.target-size-input span {
+    padding: 12px 14px;
+    color: #aeb8cc;
+    font-size: 14px;
+    font-weight: 600;
+    border-left: 1px solid #33415c;
+}
