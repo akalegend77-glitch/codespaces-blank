@@ -70,33 +70,57 @@
         </div>
 
 
-        <!-- Controls -->
+        
+      <!-- Controls -->
 
-        <div id="controls">
+<div id="controls">
 
-            <label for="quality">
+    <label for="quality">
 
-                Image Quality:
+        Image Quality:
 
-                <strong id="qualityValue">
-                    70%
-                </strong>
+        <strong id="qualityValue">
+            70%
+        </strong>
 
-            </label>
+    </label>
 
-            <input
-                type="range"
-                id="quality"
-                min="10"
-                max="95"
-                value="70"
-            >
+    <input
+        type="range"
+        id="quality"
+        min="10"
+        max="95"
+        value="70"
+    >
 
-            <button id="compressButton">
-                Compress Image
-            </button>
+    <label for="targetSize">
+        Target Size:
+        <span>(optional)</span>
+    </label>
 
-        </div>
+    <div class="target-size-input">
+
+        <input
+            type="number"
+            id="targetSize"
+            min="1"
+            step="1"
+            placeholder="e.g. 200"
+        >
+
+        <span>KB</span>
+
+    </div>
+
+    <p class="target-size-hint">
+        Enter a target size to automatically adjust compression quality.
+    </p>
+
+    <button id="compressButton">
+        Compress Image
+    </button>
+
+</div>
 
 
         <!-- Result -->

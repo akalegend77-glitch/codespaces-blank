@@ -22,6 +22,9 @@ const quality =
 const qualityValue =
     document.getElementById("qualityValue");
 
+const targetSize =
+    document.getElementById("targetSize");
+
 const compressButton =
     document.getElementById("compressButton");
 
@@ -162,16 +165,17 @@ function handleFiles(files) {
 
 
     // Reset quality
+quality.value = 70;
+qualityValue.textContent =
+    "70%";
 
-    quality.value = 70;
+// Reset target size
+if (targetSize) {
+    targetSize.value = "";
+}
 
-    qualityValue.textContent =
-        "70%";
-
-
-    // Clear old batch results
-
-    clearBatchResults();
+// Clear old batch results
+clearBatchResults();
 }
 
 
@@ -320,20 +324,17 @@ function compressImage(file) {
         const reader =
             new FileReader();
 
-
         reader.onload =
             function (event) {
 
                 const image =
                     new Image();
 
-
                 image.onload =
-                    function () {
+                    async function () {
 
                         const MAX_WIDTH = 2400;
                         const MAX_HEIGHT = 2400;
-
 
                         let width =
                             image.width;
@@ -341,8 +342,9 @@ function compressImage(file) {
                         let height =
                             image.height;
 
-
-                        // Smart Resize
+                        // ========================================
+                        // SMART RESIZE
+                        // ========================================
 
                         if (
                             width > MAX_WIDTH ||
@@ -354,7 +356,6 @@ function compressImage(file) {
                                     MAX_WIDTH / width,
                                     MAX_HEIGHT / height
                                 );
-
 
                             width =
                                 Math.round(
@@ -368,11 +369,14 @@ function compressImage(file) {
                         }
 
 
+                        // ========================================
+                        // CREATE CANVAS
+                        // ========================================
+
                         const canvas =
                             document.createElement(
                                 "canvas"
                             );
-
 
                         canvas.width =
                             width;
@@ -380,12 +384,10 @@ function compressImage(file) {
                         canvas.height =
                             height;
 
-
                         const ctx =
                             canvas.getContext(
                                 "2d"
                             );
-
 
                         ctx.drawImage(
                             image,
@@ -396,63 +398,326 @@ function compressImage(file) {
                         );
 
 
+                        // ========================================
+                        // QUALITY SETTINGS
+                        // ========================================
+
                         const selectedQuality =
                             Number(
                                 quality.value
                             ) / 100;
 
 
-                        canvas.toBlob(
+                        // ========================================
+                        // TARGET SIZE
+                        // ========================================
 
-                            function (blob) {
+                        const targetKB =
+                            targetSize
+                                ? Number(targetSize.value)
+                                : 0;
 
-                                // If compression makes the
-                                // file larger, keep original.
-
-                                const finalBlob =
-                                    blob && blob.size < file.size
-                                        ? blob
-                                        : file;
+                        const targetBytes =
+                            targetKB > 0
+                                ? targetKB * 1024
+                                : null;
 
 
-                                resolve({
+                        // ========================================
+                        // NORMAL COMPRESSION
+                        // ========================================
 
-                                    file: file,
+                        if (!targetBytes) {
 
-                                    blob: finalBlob,
+                            const blob =
+                                await canvasToJpeg(
+                                    canvas,
+                                    selectedQuality
+                                );
 
-                                    originalWidth:
-                                        image.width,
+                            const finalBlob =
+                                blob &&
+                                blob.size < file.size
+                                    ? blob
+                                    : file;
 
-                                    originalHeight:
-                                        image.height,
+                            resolve({
 
-                                    finalWidth:
-                                        width,
+                                file: file,
 
-                                    finalHeight:
-                                        height
+                                blob: finalBlob,
 
-                                });
+                                originalWidth:
+                                    image.width,
 
-                            },
+                                originalHeight:
+                                    image.height,
 
-                            "image/jpeg",
+                                finalWidth:
+                                    width,
 
-                            selectedQuality
-                        );
+                                finalHeight:
+                                    height
+
+                            });
+
+                            return;
+                        }
+
+
+                        // ========================================
+                        // TARGET-SIZE COMPRESSION
+                        // ========================================
+
+                        // If the original file is already
+                        // smaller than the target, don't force
+                        // unnecessary compression.
+                        if (
+                            file.size <= targetBytes
+                        ) {
+
+                            resolve({
+
+                                file: file,
+
+                                blob: file,
+
+                                originalWidth:
+                                    image.width,
+
+                                originalHeight:
+                                    image.height,
+
+                                finalWidth:
+                                    width,
+
+                                finalHeight:
+                                    height
+
+                            });
+
+                            return;
+                        }
+
+
+                        // ========================================
+                        // FIRST TRY: MAXIMUM SELECTED QUALITY
+                        // ========================================
+
+                        const highQualityBlob =
+                            await canvasToJpeg(
+                                canvas,
+                                selectedQuality
+                            );
+
+                        if (
+                            highQualityBlob &&
+                            highQualityBlob.size <= targetBytes
+                        ) {
+
+                            const finalBlob =
+                                highQualityBlob.size < file.size
+                                    ? highQualityBlob
+                                    : file;
+
+                            resolve({
+
+                                file: file,
+
+                                blob: finalBlob,
+
+                                originalWidth:
+                                    image.width,
+
+                                originalHeight:
+                                    image.height,
+
+                                finalWidth:
+                                    width,
+
+                                finalHeight:
+                                    height
+
+                            });
+
+                            return;
+                        }
+
+
+                        // ========================================
+                        // FIND LOWEST QUALITY
+                        // ========================================
+
+                        const MIN_QUALITY = 0.05;
+
+                        const lowQualityBlob =
+                            await canvasToJpeg(
+                                canvas,
+                                MIN_QUALITY
+                            );
+
+
+                        // ========================================
+                        // TARGET IMPOSSIBLE
+                        // ========================================
+
+                        if (
+                            !lowQualityBlob ||
+                            lowQualityBlob.size > targetBytes
+                        ) {
+
+                            const finalBlob =
+                                lowQualityBlob &&
+                                lowQualityBlob.size < file.size
+                                    ? lowQualityBlob
+                                    : file;
+
+                            resolve({
+
+                                file: file,
+
+                                blob: finalBlob,
+
+                                originalWidth:
+                                    image.width,
+
+                                originalHeight:
+                                    image.height,
+
+                                finalWidth:
+                                    width,
+
+                                finalHeight:
+                                    height
+
+                            });
+
+                            return;
+                        }
+
+
+                        // ========================================
+                        // BINARY SEARCH FOR BEST QUALITY
+                        // ========================================
+
+                        let low =
+                            MIN_QUALITY;
+
+                        let high =
+                            selectedQuality;
+
+                        let bestBlob =
+                            lowQualityBlob;
+
+
+                        for (
+                            let i = 0;
+                            i < 9;
+                            i++
+                        ) {
+
+                            const middle =
+                                (low + high) / 2;
+
+                            const testBlob =
+                                await canvasToJpeg(
+                                    canvas,
+                                    middle
+                                );
+
+                            if (!testBlob) {
+                                break;
+                            }
+
+
+                            if (
+                                testBlob.size <= targetBytes
+                            ) {
+
+                                // This quality works.
+                                // Try an even higher quality.
+                                bestBlob =
+                                    testBlob;
+
+                                low =
+                                    middle;
+
+                            } else {
+
+                                // Too large.
+                                // Reduce quality.
+                                high =
+                                    middle;
+                            }
+                        }
+
+
+                        // ========================================
+                        // FINAL SAFETY CHECK
+                        // ========================================
+
+                        const finalBlob =
+                            bestBlob &&
+                            bestBlob.size < file.size
+                                ? bestBlob
+                                : file;
+
+
+                        resolve({
+
+                            file: file,
+
+                            blob: finalBlob,
+
+                            originalWidth:
+                                image.width,
+
+                            originalHeight:
+                                image.height,
+
+                            finalWidth:
+                                width,
+
+                            finalHeight:
+                                height
+
+                        });
+
                     };
 
 
                 image.src =
                     event.target.result;
+
             };
 
 
         reader.readAsDataURL(file);
-    });
-}
 
+    });
+
+}
+// ========================================
+// CANVAS JPEG HELPER
+// ========================================
+
+function canvasToJpeg(canvas, quality) {
+
+    return new Promise(function (resolve) {
+
+        canvas.toBlob(
+            function (blob) {
+
+                resolve(blob);
+
+            },
+            "image/jpeg",
+            quality
+        );
+
+    });
+
+}
 
 // ========================================
 // SHOW RESULTS
@@ -1440,13 +1705,15 @@ resetButton.addEventListener(
         clearBatchDownloadURLs();
 
 
-        quality.value =
-            70;
+     quality.value =
+    70;
 
+qualityValue.textContent =
+    "70%";
 
-        qualityValue.textContent =
-            "70%";
-
+if (targetSize) {
+    targetSize.value = "";
+}
 
         if (previewURL) {
 
